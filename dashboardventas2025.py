@@ -53,7 +53,12 @@ else:
 
 # --- Date Filter ---
 st.sidebar.header("Filtro por Fecha")
-min_date = filtered_df['Order Date'].min().date() if not filtered_df.empty else pd.Timestamp.now().date()
+# 1. Quita los valores nulos (NaT) antes de calcular el mínimo.
+# 2. Usa .min() para obtener la fecha más antigua.
+# 3. Usa .date() para obtener solo el componente de fecha (sin hora).
+
+# La versión segura:
+min_date = filtered_df['Order Date'].dropna().min().date() if not filtered_df['Order Date'].dropna().empty else pd.Timestamp.now().date()
 max_date = filtered_df['Order Date'].max().date() if not filtered_df.empty else pd.Timestamp.now().date()
 
 start_date = st.sidebar.date_input('Fecha de Inicio', value=min_date)
