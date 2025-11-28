@@ -9,6 +9,9 @@ st.title("Análisis de Ventas y Profitabilidad")
 @st.cache_data
 def load_data(path):
     df = pd.read_excel(path)
+    # Convert 'Order Date' to datetime objects for proper filtering
+    # Assuming 'Order Date' is in days since 1899-12-30 (Excel's epoch)
+    df['Order Date'] = pd.to_datetime(df['Order Date'], unit='D', origin='1899-12-30')
     return df
 
 df_orders = load_data('OrdersFinal.xlsx')
@@ -41,18 +44,43 @@ else:
     # If 'Todos' states, the filtered_df remains as filtered by region only
     pass
 
+# --- Date Filter ---
+st.sidebar.header("Filtro por Fecha")
+min_date = filtered_df['Order Date'].min().date() if not filtered_df.empty else pd.Timestamp.now().date()
+max_date = filtered_df['Order Date'].max().date() if not filtered_df.empty else pd.Timestamp.now().date()
+
+start_date = st.sidebar.date_input('Fecha de Inicio', value=min_date)
+end_date = st.sidebar.date_input('Fecha de Fin', value=max_date)
+
+# Ensure start_date is not after end_date
+if start_date > end_date:
+    st.sidebar.error('Error: La fecha de inicio no puede ser posterior a la fecha de fin.')
+else:
+    filtered_df = filtered_df[(filtered_df['Order Date'].dt.date >= start_date) & 
+                              (filtered_df['Order Date'].dt.date <= end_date)]
+    if chart_title_suffix:
+        chart_title_suffix = f'{chart_title_suffix}, del {start_date} al {end_date}'
+    else:
+        chart_title_suffix = f' del {start_date} al {end_date}'
+
 # --- Top 5 Most Sold Products Chart ---
 st.header("Top 5 Productos Más Vendidos por Cantidad")
-top_products = filtered_df.groupby('Product Name')['Quantity'].sum().nlargest(5).reset_index()
-fig_sold = px.bar(top_products, x='Product Name', y='Quantity', 
-                  title=f'Top 5 Productos Más Vendidos por Cantidad{chart_title_suffix}',
-                  labels={'Product Name': 'Producto', 'Quantity': 'Cantidad Total Vendida'})
-st.plotly_chart(fig_sold, use_container_width=True)
+if not filtered_df.empty:
+    top_products = filtered_df.groupby('Product Name')['Quantity'].sum().nlargest(5).reset_index()
+    fig_sold = px.bar(top_products, x='Product Name', y='Quantity', 
+                      title=f'Top 5 Productos Más Vendidos por Cantidad{chart_title_suffix}',
+                      labels={'Product Name': 'Producto', 'Quantity': 'Cantidad Total Vendida'})
+    st.plotly_chart(fig_sold, use_container_width=True)
+else:
+    st.warning("No hay datos para mostrar con los filtros seleccionados.")
 
 # --- Top 5 Products by Profit Chart ---
 st.header("Top 5 Productos por Profit")
-top_profit_products = filtered_df.groupby('Product Name')['Profit'].sum().nlargest(5).reset_index()
-fig_profit = px.bar(top_profit_products, x='Product Name', y='Profit', 
-                     title=f'Top 5 Productos por Profit{chart_title_suffix}',
-                     labels={'Product Name': 'Producto', 'Profit': 'Profit Total'})
-st.plotly_chart(fig_profit, use_container_width=True)
+if not filtered_df.empty:
+    top_profit_products = filtered_df.groupby('Product Name')['Profit'].sum().nlargest(5).reset_index()
+    fig_profit = px.bar(top_profit_products, x='Product Name', y='Profit', 
+                         title=f'Top 5 Productos por Profit{chart_title_suffix}',
+                         labels={'Product Name': 'Producto', 'Profit': 'Profit Total'})
+    st.plotly_chart(fig_profit, use_container_width=True)
+else:
+    st.warning("No hay datos para mostrar con los filtros seleccionados.")
