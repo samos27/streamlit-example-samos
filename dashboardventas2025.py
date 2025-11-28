@@ -1,30 +1,42 @@
 import streamlit as st
-# Load data
-@st.cache_data
-def load_data(path):
-    df = pd.read_excel(path)
-    return df
-import streamlit as st
 import pandas as pd
 import plotly.express as px
 
 st.set_page_config(layout="wide")
 st.title("Análisis de Ventas y Profitabilidad")
 
+# Load data
+@st.cache_data
+def load_data(path):
+    df = pd.read_excel(path)
+    return df
+
 df_orders = load_data('OrdersFinal.xlsx')
+
+# --- Region Filter ---
+st.sidebar.header("Filtro por Región")
+regions = df_orders['Region'].unique().tolist()
+selected_region = st.sidebar.selectbox('Selecciona una Región', ['Todas'] + regions)
+
+if selected_region != 'Todas':
+    filtered_df = df_orders[df_orders['Region'] == selected_region]
+    chart_title_suffix = f' en {selected_region}'
+else:
+    filtered_df = df_orders
+    chart_title_suffix = ''
 
 # --- Top 5 Most Sold Products Chart ---
 st.header("Top 5 Productos Más Vendidos por Cantidad")
-top_products = df_orders.groupby('Product Name')['Quantity'].sum().nlargest(5).reset_index()
+top_products = filtered_df.groupby('Product Name')['Quantity'].sum().nlargest(5).reset_index()
 fig_sold = px.bar(top_products, x='Product Name', y='Quantity', 
-                  title='Top 5 Productos Más Vendidos por Cantidad',
+                  title=f'Top 5 Productos Más Vendidos por Cantidad{chart_title_suffix}',
                   labels={'Product Name': 'Producto', 'Quantity': 'Cantidad Total Vendida'})
 st.plotly_chart(fig_sold, use_container_width=True)
 
 # --- Top 5 Products by Profit Chart ---
 st.header("Top 5 Productos por Profit")
-top_profit_products = df_orders.groupby('Product Name')['Profit'].sum().nlargest(5).reset_index()
+top_profit_products = filtered_df.groupby('Product Name')['Profit'].sum().nlargest(5).reset_index()
 fig_profit = px.bar(top_profit_products, x='Product Name', y='Profit', 
-                     title='Top 5 Productos por Profit',
+                     title=f'Top 5 Productos por Profit{chart_title_suffix}',
                      labels={'Product Name': 'Producto', 'Profit': 'Profit Total'})
 st.plotly_chart(fig_profit, use_container_width=True)
