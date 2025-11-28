@@ -11,14 +11,8 @@ def load_data(path):
     df = pd.read_excel(path)
     # Convert 'Order Date' to datetime objects for proper filtering
     # Assuming 'Order Date' is in days since 1899-12-30 (Excel's epoch)
-@st.cache_data
-def load_data(path):
-    # Carga los datos y convierte la columna 'Order Date' a datetime inmediatamente
-    df = pd.read_excel(path, parse_dates=['Order Date']) 
-    return df
-
-# Elimina la línea de conversión posterior:
-# df['Order Date'] = pd.to_datetime(df['Order Date'], unit='D', origin='1899-12-30')
+    df['Order Date'] = pd.to_datetime(df['Order Date'], unit='D', origin='1899-12-30')
+    df['Ship Date'] = pd.to_datetime(df['Ship Date'], unit='D', origin='1899-12-30')
     return df
 
 df_orders = load_data('OrdersFinal.xlsx')
@@ -52,39 +46,19 @@ else:
     pass
 
 # --- Date Filter ---
-st.sidebar.header("Filtro por Fecha")
-# 1. Quita los valores nulos (NaT) antes de calcular el mínimo.
-# 2. Usa .min() para obtener la fecha más antigua.
-# 3. Usa .date() para obtener solo el componente de fecha (sin hora).
+st.sidebar.header("Filtro por Fecha de Envío")
+min_date = filtered_df['Ship Date'].min().date() if not filtered_df.empty else pd.Timestamp.now().date()
+max_date = filtered_df['Ship Date'].max().date() if not filtered_df.empty else pd.Timestamp.now().date()
 
-# La versión segura:
-# dashboardventas2025.py (Línea 61)
-
-# Primero, filtramos la serie para quitar NaT
-date_series = filtered_df['Order Date'].dropna()
-
-# Luego, verificamos si la serie filtrada tiene datos.
-if not date_series.empty:
-    min_date = date_series.min().date()
-    max_date = date_series.max().date()
-else:
-    # Si no hay datos (la serie está vacía después del filtro), usa la fecha de hoy.
-    min_date = pd.Timestamp.now().date()
-    max_date = pd.Timestamp.now().date()
-
-# Ahora puedes usar min_date y max_date con st.date_input
-# ...
-max_date = filtered_df['Order Date'].max().date() if not filtered_df.empty else pd.Timestamp.now().date()
-
-start_date = st.sidebar.date_input('Fecha de Inicio', value=min_date)
-end_date = st.sidebar.date_input('Fecha de Fin', value=max_date)
+start_date = st.sidebar.date_input('Fecha de Inicio de Envío', value=min_date)
+end_date = st.sidebar.date_input('Fecha de Fin de Envío', value=max_date)
 
 # Ensure start_date is not after end_date
 if start_date > end_date:
-    st.sidebar.error('Error: La fecha de inicio no puede ser posterior a la fecha de fin.')
+    st.sidebar.error('Error: La fecha de inicio de envío no puede ser posterior a la fecha de fin de envío.')
 else:
-    filtered_df = filtered_df[(filtered_df['Order Date'].dt.date >= start_date) & 
-                              (filtered_df['Order Date'].dt.date <= end_date)]
+    filtered_df = filtered_df[(filtered_df['Ship Date'].dt.date >= start_date) & 
+                              (filtered_df['Ship Date'].dt.date <= end_date)]
     if chart_title_suffix:
         chart_title_suffix = f'{chart_title_suffix}, del {start_date} al {end_date}'
     else:
