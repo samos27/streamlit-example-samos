@@ -11,7 +11,7 @@ def load_data(path):
     df = pd.read_excel(path)
     # Convert 'Order Date' to datetime objects for proper filtering
     # Assuming 'Order Date' is in days since 1899-12-30 (Excel's epoch)
- @st.cache_data
+@st.cache_data
 def load_data(path):
     # Carga los datos y convierte la columna 'Order Date' a datetime inmediatamente
     df = pd.read_excel(path, parse_dates=['Order Date']) 
