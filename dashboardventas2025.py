@@ -58,7 +58,22 @@ st.sidebar.header("Filtro por Fecha")
 # 3. Usa .date() para obtener solo el componente de fecha (sin hora).
 
 # La versión segura:
-min_date = filtered_df['Order Date'].dropna().min().date() if not filtered_df['Order Date'].dropna().empty else pd.Timestamp.now().date()
+# dashboardventas2025.py (Línea 61)
+
+# Primero, filtramos la serie para quitar NaT
+date_series = filtered_df['Order Date'].dropna()
+
+# Luego, verificamos si la serie filtrada tiene datos.
+if not date_series.empty:
+    min_date = date_series.min().date()
+    max_date = date_series.max().date()
+else:
+    # Si no hay datos (la serie está vacía después del filtro), usa la fecha de hoy.
+    min_date = pd.Timestamp.now().date()
+    max_date = pd.Timestamp.now().date()
+
+# Ahora puedes usar min_date y max_date con st.date_input
+# ...
 max_date = filtered_df['Order Date'].max().date() if not filtered_df.empty else pd.Timestamp.now().date()
 
 start_date = st.sidebar.date_input('Fecha de Inicio', value=min_date)
