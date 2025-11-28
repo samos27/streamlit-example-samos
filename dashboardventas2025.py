@@ -45,25 +45,6 @@ else:
     # If 'Todos' states, the filtered_df remains as filtered by region only
     pass
 
-# --- Date Filter ---
-st.sidebar.header("Filtro por Fecha de Envío")
-min_date = filtered_df['Ship Date'].min().date() if not filtered_df.empty else pd.Timestamp.now().date()
-max_date = filtered_df['Ship Date'].max().date() if not filtered_df.empty else pd.Timestamp.now().date()
-
-start_date = st.sidebar.date_input('Fecha de Inicio de Envío', value=min_date)
-end_date = st.sidebar.date_input('Fecha de Fin de Envío', value=max_date)
-
-# Ensure start_date is not after end_date
-if start_date > end_date:
-    st.sidebar.error('Error: La fecha de inicio de envío no puede ser posterior a la fecha de fin de envío.')
-else:
-    filtered_df = filtered_df[(filtered_df['Ship Date'].dt.date >= start_date) & 
-                              (filtered_df['Ship Date'].dt.date <= end_date)]
-    if chart_title_suffix:
-        chart_title_suffix = f'{chart_title_suffix}, del {start_date} al {end_date}'
-    else:
-        chart_title_suffix = f' del {start_date} al {end_date}'
-
 # --- Top 5 Most Sold Products Chart ---
 st.header("Top 5 Productos Más Vendidos por Cantidad")
 if not filtered_df.empty:
