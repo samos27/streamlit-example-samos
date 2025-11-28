@@ -1,0 +1,4 @@
+[general]
+# Esto fuerza a Streamlit Cloud a usar Python 3.11, que es compatible
+# con las bibliotecas estándar de la ciencia de datos.
+python_version = 3.11
