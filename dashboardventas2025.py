@@ -9,10 +9,6 @@ st.title("Análisis de Ventas y Profitabilidad")
 @st.cache_data
 def load_data(path):
     df = pd.read_excel(path)
-    # Convert 'Order Date' to datetime objects for proper filtering
-    # Assuming 'Order Date' is in days since 1899-12-30 (Excel's epoch)
-    df['Order Date'] = pd.to_datetime(df['Order Date'], unit='D', origin='1899-12-30')
-    df['Ship Date'] = pd.to_datetime(df['Ship Date'], unit='D', origin='1899-12-30')
     return df
 
 df_orders = load_data('OrdersFinal.xlsx')
