@@ -1,4 +1,4 @@
-
+import streamlit as st
 # Load data
 @st.cache_data
 def load_data(path):
