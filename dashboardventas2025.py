@@ -25,6 +25,22 @@ else:
     filtered_df = df_orders
     chart_title_suffix = ''
 
+# --- State Filter (dependent on Region) ---
+st.sidebar.header("Filtro por Estado")
+# Get unique states based on the current filtered_df (which is already filtered by region if applicable)
+states = filtered_df['State'].unique().tolist()
+selected_state = st.sidebar.selectbox('Selecciona un Estado', ['Todos'] + states)
+
+if selected_state != 'Todos':
+    filtered_df = filtered_df[filtered_df['State'] == selected_state]
+    if chart_title_suffix:
+        chart_title_suffix = f'{chart_title_suffix}, {selected_state}'
+    else:
+        chart_title_suffix = f' en {selected_state}'
+else:
+    # If 'Todos' states, the filtered_df remains as filtered by region only
+    pass
+
 # --- Top 5 Most Sold Products Chart ---
 st.header("Top 5 Productos Más Vendidos por Cantidad")
 top_products = filtered_df.groupby('Product Name')['Quantity'].sum().nlargest(5).reset_index()
