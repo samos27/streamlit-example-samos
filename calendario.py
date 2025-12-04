@@ -8,7 +8,7 @@ st.set_page_config(layout="wide")
 st.title("Mi Calendario de Eventos 📅")
 
 # --- Load and Prepare Data for the Streamlit app ---
-excel_file_path = 'Control de Fechas 2025 Auto (1).xlsx'
+excel_file_path = 'Control de Fechas 2025 Auto Finaaaal.xlsx'
 
 original_events_app = [] # Store all events initially
 df_app = pd.DataFrame()
@@ -63,15 +63,17 @@ if not df_app.empty:
             (filtered_df_app['FECHA'] <= end_date_filter)
         ]
 
-    # Model Filter
+    # Model Filter (changed to selectbox with 'Todos los modelos' option)
     unique_models = df_app['MODELO'].unique().tolist() if not df_app.empty else []
-    selected_models = st.sidebar.multiselect(
+    model_options = ['Todos los modelos'] + sorted(unique_models)
+    selected_model = st.sidebar.selectbox(
         "Filtrar por Modelo",
-        options=unique_models,
-        default=unique_models # Select all by default
+        options=model_options,
+        index=0 # 'Todos los modelos' selected by default
     )
-    if selected_models:
-        filtered_df_app = filtered_df_app[filtered_df_app['MODELO'].isin(selected_models)]
+
+    if selected_model != 'Todos los modelos':
+        filtered_df_app = filtered_df_app[filtered_df_app['MODELO'] == selected_model]
 
     # Re-prepare events based on filtered DataFrame (this is mostly for calendar view)
     events_to_display = []
