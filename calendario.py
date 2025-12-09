@@ -101,6 +101,13 @@ view_type = st.radio("Seleccionar Vista", ('Calendario', 'Lista'), index=0)
 
 # --- Display Content based on View Type ---
 if view_type == 'Calendario':
+    # Calendar View Selector
+    selected_calendar_view = st.selectbox(
+        "Seleccionar Vista de Calendario",
+        ['dayGridMonth', 'timeGridWeek', 'timeGridDay', 'listWeek', 'listDay'],
+        index=0 # Default to month view
+    )
+
     # --- Calendar Configuration ---
     calendar_options = {
         "editable": "true",
@@ -108,9 +115,9 @@ if view_type == 'Calendario':
         "headerToolbar": {
             "left": "today prev,next",
             "center": "title",
-            "right": "dayGridMonth,timeGridWeek,timeGridDay"
+            "right": "dayGridMonth,timeGridWeek,timeGridDay,listWeek,listDay" # Added list views
         },
-        "initialView": "dayGridMonth",
+        "initialView": selected_calendar_view, # Use the selected view
         "locale": "es", # Set calendar locale to Spanish
         "height": "auto" # Adjust height automatically
     }
