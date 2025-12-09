@@ -6,7 +6,7 @@ import altair as alt # Import Altair
 
 st.set_page_config(layout="wide")
 
-st.title("Mi Calendario de Eventos 📆")
+st.title("Mi Calendario de Eventos 📅")
 
 # --- Load and Prepare Data for the Streamlit app ---
 excel_file_path = 'Control de Fechas 2025 Auto Finaaaal.xlsx'
@@ -120,7 +120,7 @@ if view_type == 'Calendario':
         },
         "initialView": selected_calendar_view, # Use the selected view
         "locale": "es", # Set calendar locale to Spanish
-        "height": "auto"
+        "height": "auto" # Adjust height automatically
     }
 
     if events_to_display:
@@ -144,21 +144,6 @@ if view_type == 'Calendario':
                                       key="fullcalendar")
 
         st.write(calendar_component)
-
-        # --- Event Click Details ---
-        if calendar_component['eventClick']:
-            st.subheader('Detalles del Evento Seleccionado')
-            clicked_event = calendar_component['eventClick']['event']
-            st.write(f"**Título:** {clicked_event['title']}")
-            st.write(f"**Fecha:** {clicked_event['start']}")
-            
-            # Display extended properties
-            if 'extendedProps' in clicked_event:
-                st.write("**Detalles Adicionales:**")
-                st.json(clicked_event['extendedProps'])
-            else:
-                st.write("No hay detalles adicionales disponibles para este evento.")
-
     else:
         st.warning("No hay eventos para mostrar con los filtros seleccionados.")
 
