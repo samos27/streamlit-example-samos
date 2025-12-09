@@ -2,6 +2,7 @@ import streamlit as st
 from streamlit_calendar import calendar
 import pandas as pd
 from datetime import datetime, date
+import altair as alt # Import Altair
 
 st.set_page_config(layout="wide")
 
@@ -154,5 +155,55 @@ elif view_type == 'Lista':
         st.dataframe(filtered_df_app[display_columns].sort_values(by='FECHA').reset_index(drop=True))
     else:
         st.warning("No hay eventos para mostrar con los filtros seleccionados.")
+
+# --- New Section: Top 5 Inflables Chart ---
+st.subheader("Top 5 Inflables Más Rentados por Mes y Año")
+
+if not df_app.empty:
+    # Get unique years for the selectbox
+    df_app['YEAR'] = df_app['FECHA'].dt.year
+    df_app['MONTH'] = df_app['FECHA'].dt.month
+
+    all_years = sorted(df_app['YEAR'].unique().tolist(), reverse=True)
+    selected_year = st.selectbox("Selecciona el Año", options=all_years, key="select_year")
+
+    # Filter months based on the selected year
+    available_months_for_year = df_app[df_app['YEAR'] == selected_year]['MONTH'].unique().tolist()
+    available_months_for_year.sort()
+
+    month_map = {
+        1: 'Enero', 2: 'Febrero', 3: 'Marzo', 4: 'Abril', 5: 'Mayo', 6: 'Junio',
+        7: 'Julio', 8: 'Agosto', 9: 'Septiembre', 10: 'Octubre', 11: 'Noviembre', 12: 'Diciembre'
+    }
+    month_map_inv = {v: k for k, v in month_map.items()}
+
+    month_options = [month_map[m] for m in available_months_for_year]
+    selected_month_name = st.selectbox("Selecciona el Mes", options=month_options, key="select_month")
+    selected_month_num = month_map_inv.get(selected_month_name)
+
+    if selected_year and selected_month_num:
+        df_filtered_by_date = df_app[
+            (df_app['YEAR'] == selected_year) &
+            (df_app['MONTH'] == selected_month_num)
+        ]
+
+        if not df_filtered_by_date.empty:
+            # Calculate top 5 most rented 'MODELO's
+            top_5_inflables = df_filtered_by_date['MODELO'].value_counts().nlargest(5).reset_index()
+            top_5_inflables.columns = ['MODELO', 'Conteo de Rentas']
+
+            # Create Altair bar chart
+            chart = alt.Chart(top_5_inflables).mark_bar().encode(
+                x=alt.X('Conteo de Rentas', title='Cantidad de Rentas'),
+                y=alt.Y('MODELO', sort='-x', title='Modelo de Inflable')
+            ).properties(
+                title=f'Top 5 Inflables en {selected_month_name} de {selected_year}'
+            ).interactive()
+
+            st.altair_chart(chart, use_container_width=True)
+        else:
+            st.info(f"No se encontraron rentas para {selected_month_name} de {selected_year}.")
+else:
+    st.warning("La base de datos está vacía, no se pueden mostrar los inflables más rentados.")
 
 st.write("\n--- Creado con Streamlit y streamlit_calendar ---")
